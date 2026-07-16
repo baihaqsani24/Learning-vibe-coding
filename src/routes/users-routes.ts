@@ -25,7 +25,18 @@ export const usersRoutes = new Elysia({ prefix: "/api" })
       name: t.String({ maxLength: 255 }),
       email: t.String({ maxLength: 255 }),
       password: t.String({ maxLength: 255 })
-    })
+    }),
+    response: {
+      200: t.Object({
+        data: t.String({ default: "OK" })
+      }, { description: "Registrasi Berhasil" }),
+      400: t.Object({
+        error: t.String({ default: "email sudah terdaftar" })
+      }, { description: "Email sudah digunakan" }),
+      422: t.Object({
+        error: t.String()
+      }, { description: "Validasi Gagal (misal nama > 255 karakter)" })
+    }
   })
   /**
    * Endpoint: POST /api/users/login
@@ -49,7 +60,18 @@ export const usersRoutes = new Elysia({ prefix: "/api" })
       name: t.String({ maxLength: 255 }),
       email: t.String({ maxLength: 255 }),
       password: t.String({ maxLength: 255 })
-    })
+    }),
+    response: {
+      200: t.Object({
+        data: t.String({ default: "Berhasil" })
+      }, { description: "Login Berhasil" }),
+      401: t.Object({
+        error: t.String({ default: "email atau password salah" })
+      }, { description: "Kredensial salah" }),
+      422: t.Object({
+        error: t.String()
+      }, { description: "Validasi Gagal" })
+    }
   })
   /**
    * Endpoint: GET /api/users/current
@@ -77,6 +99,19 @@ export const usersRoutes = new Elysia({ prefix: "/api" })
       summary: 'Dapatkan profil pengguna saat ini',
       description: 'Mengambil data profil pengguna berdasarkan token aktif di header Authorization.',
       security: [{ BearerAuth: [] }]
+    },
+    response: {
+      200: t.Object({
+        data: t.Object({
+          id: t.Numeric({ default: 1 }),
+          name: t.String({ default: "Nama User" }),
+          email: t.String({ default: "user@example.com" }),
+          created_at: t.Union([t.Date(), t.Null()])
+        })
+      }, { description: "Data Profil Berhasil Diambil" }),
+      401: t.Object({
+        error: t.String({ default: "Unauthorized" })
+      }, { description: "Token Sesi Tidak Valid atau Kedaluwarsa" })
     }
   })
   /**
@@ -105,5 +140,13 @@ export const usersRoutes = new Elysia({ prefix: "/api" })
       summary: 'Keluar log (Logout)',
       description: 'Menghapus sesi aktif pengguna berdasarkan token yang dikirimkan.',
       security: [{ BearerAuth: [] }]
+    },
+    response: {
+      200: t.Object({
+        data: t.String({ default: "OK" })
+      }, { description: "Logout Berhasil" }),
+      401: t.Object({
+        error: t.String({ default: "Unauthorized" })
+      }, { description: "Token Sesi Tidak Valid" })
     }
   });

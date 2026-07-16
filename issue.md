@@ -61,13 +61,13 @@ export const app = new Elysia()
 
 ---
 
-### Langkah 3: Menambahkan Dokumentasi Detail pada Endpoint
-ElysiaJS membaca skema rute untuk diubah menjadi dokumentasi Swagger. Kita bisa menambahkan informasi detail menggunakan properti `detail` di parameter pengujian skema Elysia.
+### Langkah 3: Menambahkan Dokumentasi Detail & Contoh Response pada Endpoint
+ElysiaJS membaca skema rute untuk diubah menjadi dokumentasi Swagger. Kita bisa menambahkan informasi detail menggunakan properti `detail` dan mendefinisikan contoh response body menggunakan properti `response` di parameter pengujian skema Elysia.
 
-Buka file `src/routes/users-routes.ts`, lalu tambahkan properti `detail` di setiap endpoint:
+Buka file `src/routes/users-routes.ts`, lalu tambahkan properti `detail` dan `response` di setiap endpoint:
 
 #### A. Registrasi Pengguna (`POST /users`)
-Tambahkan deskripsi singkat dan tag kelompok rute:
+Tambahkan deskripsi singkat, tag kelompok rute, dan contoh respon:
 ```typescript
   .post("/users", async ({ body, set }) => {
     // ... logic registrasi
@@ -81,7 +81,18 @@ Tambahkan deskripsi singkat dan tag kelompok rute:
       name: t.String({ maxLength: 255 }),
       email: t.String({ maxLength: 255 }),
       password: t.String({ maxLength: 255 })
-    })
+    }),
+    response: {
+      200: t.Object({
+        data: t.String({ default: "OK" })
+      }, { description: "Registrasi Berhasil" }),
+      400: t.Object({
+        error: t.String({ default: "email sudah terdaftar" })
+      }, { description: "Email sudah digunakan" }),
+      422: t.Object({
+        error: t.String()
+      }, { description: "Validasi Gagal (misal nama > 255 karakter)" })
+    }
   })
 ```
 
@@ -93,18 +104,29 @@ Tambahkan deskripsi singkat dan tag kelompok rute:
     detail: {
       tags: ['Users'],
       summary: 'Masuk log (Login)',
-      description: 'Verifikasi kredensial pengguna dan mengembalikan token autentikasi.'
+      description: 'Verifikasi kredensial pengguna dan mengembalikan status berhasil.'
     },
     body: t.Object({
       name: t.String({ maxLength: 255 }),
       email: t.String({ maxLength: 255 }),
       password: t.String({ maxLength: 255 })
-    })
+    }),
+    response: {
+      200: t.Object({
+        data: t.String({ default: "Berhasil" })
+      }, { description: "Login Berhasil" }),
+      401: t.Object({
+        error: t.String({ default: "email atau password salah" })
+      }, { description: "Kredensial salah" }),
+      422: t.Object({
+        error: t.String()
+      }, { description: "Validasi Gagal" })
+    }
   })
 ```
 
 #### C. Get Current User Profil (`GET /users/current`)
-Rute ini membutuhkan token Bearer. Kita wajib menambahkan properti `security` agar tombol "Authorize" muncul di Swagger UI untuk rute ini.
+Rute ini membutuhkan token Bearer. Kita wajib menambahkan properti `security` agar tombol "Authorize" muncul di Swagger UI untuk rute ini, beserta contoh profil data di respon 200.
 ```typescript
   .get("/users/current", async ({ headers, set }) => {
     // ... logic ambil profile
@@ -114,6 +136,19 @@ Rute ini membutuhkan token Bearer. Kita wajib menambahkan properti `security` ag
       summary: 'Dapatkan profil pengguna saat ini',
       description: 'Mengambil data profil pengguna berdasarkan token aktif di header Authorization.',
       security: [{ BearerAuth: [] }] // Menghubungkan rute ini dengan keamanan Bearer
+    },
+    response: {
+      200: t.Object({
+        data: t.Object({
+          id: t.Numeric({ default: 1 }),
+          name: t.String({ default: "Nama User" }),
+          email: t.String({ default: "user@example.com" }),
+          created_at: t.Union([t.Date(), t.Null()])
+        })
+      }, { description: "Data Profil Berhasil Diambil" }),
+      401: t.Object({
+        error: t.String({ default: "Unauthorized" })
+      }, { description: "Token Sesi Tidak Valid atau Kedaluwarsa" })
     }
   })
 ```
@@ -129,6 +164,14 @@ Rute ini juga membutuhkan token Bearer untuk menghapus sesi.
       summary: 'Keluar log (Logout)',
       description: 'Menghapus sesi aktif pengguna berdasarkan token yang dikirimkan.',
       security: [{ BearerAuth: [] }] // Menghubungkan rute ini dengan keamanan Bearer
+    },
+    response: {
+      200: t.Object({
+        data: t.String({ default: "OK" })
+      }, { description: "Logout Berhasil" }),
+      401: t.Object({
+        error: t.String({ default: "Unauthorized" })
+      }, { description: "Token Sesi Tidak Valid" })
     }
   })
 ```
