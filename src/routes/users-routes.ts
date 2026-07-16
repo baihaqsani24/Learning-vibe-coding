@@ -11,6 +11,11 @@ export const usersRoutes = new Elysia({ prefix: "/api" })
       return { error: error.message || "Email sudah terdaftar" };
     }
   }, {
+    detail: {
+      tags: ['Users'],
+      summary: 'Daftarkan akun pengguna baru',
+      description: 'Menerima masukan name, email, dan password untuk membuat akun baru.'
+    },
     body: t.Object({
       name: t.String({ maxLength: 255 }),
       email: t.String({ maxLength: 255 }),
@@ -26,6 +31,11 @@ export const usersRoutes = new Elysia({ prefix: "/api" })
       return { error: error.message || "email atau password salah" };
     }
   }, {
+    detail: {
+      tags: ['Users'],
+      summary: 'Masuk log (Login)',
+      description: 'Verifikasi kredensial pengguna dan mengembalikan token autentikasi.'
+    },
     body: t.Object({
       name: t.String({ maxLength: 255 }),
       email: t.String({ maxLength: 255 }),
@@ -48,6 +58,13 @@ export const usersRoutes = new Elysia({ prefix: "/api" })
       set.status = 401;
       return { error: "Unauthorized" };
     }
+  }, {
+    detail: {
+      tags: ['Users'],
+      summary: 'Dapatkan profil pengguna saat ini',
+      description: 'Mengambil data profil pengguna berdasarkan token aktif di header Authorization.',
+      security: [{ BearerAuth: [] }]
+    }
   })
   .delete("/users/logout", async ({ headers, set }) => {
     const authHeader = headers.authorization;
@@ -64,5 +81,12 @@ export const usersRoutes = new Elysia({ prefix: "/api" })
     } catch (error: any) {
       set.status = 401;
       return { error: "Unauthorized" };
+    }
+  }, {
+    detail: {
+      tags: ['Users'],
+      summary: 'Keluar log (Logout)',
+      description: 'Menghapus sesi aktif pengguna berdasarkan token yang dikirimkan.',
+      security: [{ BearerAuth: [] }]
     }
   });
