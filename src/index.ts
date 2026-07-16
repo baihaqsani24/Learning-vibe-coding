@@ -3,7 +3,7 @@ import { db } from "./db";
 import { usersRoutes } from "./routes/users-routes";
 import { users } from "./db/schema";
 
-const app = new Elysia()
+export const app = new Elysia()
   .get("/", () => "Hello Elysia")
   .use(usersRoutes)
   .get("/users", async () => {
