@@ -1,5 +1,5 @@
 import { db } from "../db";
-import { users } from "../db/schema";
+import { users, sessions } from "../db/schema";
 import { eq } from "drizzle-orm";
 
 export async function registerUser(payload: typeof users.$inferInsert) {
@@ -24,4 +24,35 @@ export async function registerUser(payload: typeof users.$inferInsert) {
   });
 
   return { success: true };
+}
+
+export async function loginUser(payload: typeof users.$inferInsert) {
+  // 1. Find user by email
+  const existingUsers = await db
+    .select()
+    .from(users)
+    .where(eq(users.email, payload.email));
+
+  if (existingUsers.length === 0) {
+    throw new Error("email atau password salah");
+  }
+
+  const user = existingUsers[0];
+
+  // 2. Verify password
+  const isPasswordValid = await Bun.password.verify(payload.password, user.password);
+  if (!isPasswordValid) {
+    throw new Error("email atau password salah");
+  }
+
+  // 3. Generate UUID token
+  const token = crypto.randomUUID();
+
+  // 4. Save session in DB
+  await db.insert(sessions).values({
+    token: token,
+    userId: user.id,
+  });
+
+  return { success: true, token };
 }
