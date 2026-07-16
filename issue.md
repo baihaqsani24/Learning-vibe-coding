@@ -113,7 +113,9 @@ Tambahkan deskripsi singkat, tag kelompok rute, dan contoh respon:
     }),
     response: {
       200: t.Object({
-        data: t.String({ default: "Berhasil" })
+        data: t.Object({
+          token: t.String({ default: "e44d5678-xxxx-xxxx-xxxx-xxxxxxxxxxxx" })
+        })
       }, { description: "Login Berhasil" }),
       401: t.Object({
         error: t.String({ default: "email atau password salah" })
