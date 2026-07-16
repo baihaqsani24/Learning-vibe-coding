@@ -56,3 +56,22 @@ export async function loginUser(payload: typeof users.$inferInsert) {
 
   return { success: true, token };
 }
+
+export async function getCurrentUser(token: string) {
+  const result = await db
+    .select({
+      id: users.id,
+      name: users.name,
+      email: users.email,
+      created_at: users.createdAt,
+    })
+    .from(sessions)
+    .innerJoin(users, eq(sessions.userId, users.id))
+    .where(eq(sessions.token, token));
+
+  if (result.length === 0) {
+    throw new Error("Unauthorized");
+  }
+
+  return result[0];
+}
