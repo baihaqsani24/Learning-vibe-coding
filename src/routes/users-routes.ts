@@ -44,8 +44,8 @@ export const usersRoutes = new Elysia({ prefix: "/api" })
    */
   .post("/users/login", async ({ body, set }) => {
     try {
-      await loginUser(body);
-      return { data: "Berhasil" };
+      const result = await loginUser(body);
+      return { data: { token: result.token } };
     } catch (error: any) {
       set.status = 401;
       return { error: error.message || "email atau password salah" };
