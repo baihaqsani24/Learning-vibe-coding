@@ -1,5 +1,7 @@
 # Belajar Vibe Coding - Backend API
 
+[English](README_EN.md) | [Bahasa Indonesia](README.md)
+
 Aplikasi backend sederhana untuk manajemen pengguna (Registrasi, Login, Profil Pengguna, dan Logout) menggunakan **ElysiaJS**, **Drizzle ORM**, dan runtime **Bun**. Dokumen ini ditujukan untuk membantu programmer pemula (junior) maupun agen AI memahami struktur, teknologi, serta cara menjalankan aplikasi ini.
 
 ---
